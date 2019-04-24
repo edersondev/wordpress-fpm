@@ -6,7 +6,6 @@ services:
       - "3306:3306"
     volumes:
       - dbdata:/var/lib/mysql
-    command: --max_allowed_packet=1073741824
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -15,7 +14,7 @@ services:
     restart: unless-stopped
 
   memcached:
-    image: memcached:1.5
+    image: memcached:1.5-alpine
     ports:
       - "11211:11211"
 
@@ -25,7 +24,7 @@ services:
     ports:
       - "9000:9000"
     environment:
-      WORDPRESS_DB_HOST: dbmysql:3306
+      WORDPRESS_DB_HOST: dbmysql
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
       WORDPRESS_DB_USER: ${MYSQL_USER}
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}

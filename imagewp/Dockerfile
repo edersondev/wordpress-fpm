@@ -49,6 +49,3 @@ RUN { \
 
 COPY wordpress /usr/src/wordpress
 RUN chown -R www-data:www-data /usr/src/wordpress
-
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["php-fpm"]
