@@ -1,0 +1,57 @@
+version: '3'
+services:
+  dbmysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    command: --max_allowed_packet=1073741824
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    restart: unless-stopped
+
+  memcached:
+    image: memcached:1.5
+    ports:
+      - "11211:11211"
+
+  wp:
+    build: imagewp/
+    image: edersondev/wordpress:fpm
+    ports:
+      - "9000:9000"
+    environment:
+      WORDPRESS_DB_HOST: dbmysql:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define('FS_METHOD', 'direct');
+    depends_on:
+      - dbmysql
+      - memcached
+    volumes:
+      - ./codigo:/var/www/html
+    restart: unless-stopped
+
+  nginx:
+    build: nginx/
+    image: edersondev/nginx:1.5
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./codigo:/var/www/html
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - wp
+      - memcached
+    restart: unless-stopped
+
+volumes:
+  dbdata:
